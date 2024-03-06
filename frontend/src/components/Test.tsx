@@ -12,5 +12,5 @@ export const Test = () => {
   //     console.log("Disconnected!");
   //   },
   // });
-  return <>{isConnected ? <div>connected</div> : <div></div>}</>;
+  return <>{isConnected ? <div>connected</div> : <div>Not connected</div>}</>;
 };
