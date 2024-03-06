@@ -1,6 +1,8 @@
 // import authRouter from "@routes/auth.routes";
 // import notesRouter from "@routes/notes.routes";
 // import { globalErrorHandler } from "@services/error.service";
+import dataSourceRouter from "@routes/dataSource.routes";
+import { globalErrorHandler } from "@controllers/error.controller";
 import express from "express";
 // import { rateLimit } from "express-rate-limit";
 
@@ -17,7 +19,7 @@ app.use(express.json());
 //Apply the rate limiting middleware to API calls only
 // app.use("/api", limiter);
 
-// app.use("/api/auth", authRouter);
+app.use("/api/data", dataSourceRouter);
 // app.use("/api/notes", notesRouter);
 
 //if no route is hit till this point then
@@ -29,5 +31,5 @@ app.all("*", (req, res, next) => {
   });
 });
 
-// app.use(globalErrorHandler);
+app.use(globalErrorHandler);
 export default app;
