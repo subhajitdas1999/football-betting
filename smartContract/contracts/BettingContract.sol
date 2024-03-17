@@ -18,8 +18,9 @@ contract BettingContract is
     bytes public s_lastResponse;
     bytes public s_lastError;
 
-    uint256 public constant PREDICTION_BUFFER_TIME = 2 hours;
+    uint256 public constant PREDICTION_BUFFER_TIME = 2 minutes;
     uint256 public constant PLATFORM_FEE = 3;
+    bytes32 private secretHash;
 
     struct Game {
         uint256 registrationTime;
@@ -39,18 +40,25 @@ contract BettingContract is
     // mapping (uint =>)
 
     enum Result {
-        None, // The game has not been resolved or the result is a draw
+        // None, // The game has not been resolved or the result is a draw
         Home, // The home team won
         Away // The away team won
     }
     event GameRegistered(uint256 fixtureId, address registerer);
     event Predicted(uint256 fixtureId, uint amount);
+    event WinningAmountTransferred(
+        uint256 fixtureId,
+        uint256 winningAmount,
+        address winner
+    );
 
     //Errors
     error GameIsNotActive();
     error GameIsAlreadyRegistered();
     error TimeStampInPast();
     error UnexpectedRequestID(bytes32 requestId);
+    error PredictionWindowClosed(uint256 fixtureId);
+    error InvalidHash();
 
     modifier activeGame(uint256 _fixtureId) {
         if (!games[_fixtureId].status) revert GameIsNotActive();
@@ -63,10 +71,14 @@ contract BettingContract is
     }
 
     // Initialize function with UUPSUpgradeable
-    function initialize(address router) public initializer {
+    function initialize(
+        address router,
+        bytes32 _secretHash
+    ) public initializer {
         __Ownable_init(msg.sender);
         __UUPSUpgradeable_init();
         __FunctionClient_init(router);
+        secretHash = _secretHash;
     }
     /**
      * @notice Send a simple request
@@ -78,37 +90,38 @@ contract BettingContract is
      * @param bytesArgs Array of bytes arguments, represented as hex strings
      * @param subscriptionId Billing ID
      */
-    function sendRequest(
-        string memory source,
-        bytes memory encryptedSecretsUrls,
-        uint8 donHostedSecretsSlotID,
-        uint64 donHostedSecretsVersion,
-        string[] memory args,
-        bytes[] memory bytesArgs,
-        uint64 subscriptionId,
-        uint32 gasLimit,
-        bytes32 donID
-    ) external onlyOwner returns (bytes32 requestId) {
-        FunctionsRequest.Request memory req;
-        req.initializeRequestForInlineJavaScript(source);
-        if (encryptedSecretsUrls.length > 0)
-            req.addSecretsReference(encryptedSecretsUrls);
-        else if (donHostedSecretsVersion > 0) {
-            req.addDONHostedSecrets(
-                donHostedSecretsSlotID,
-                donHostedSecretsVersion
-            );
-        }
-        if (args.length > 0) req.setArgs(args);
-        if (bytesArgs.length > 0) req.setBytesArgs(bytesArgs);
-        s_lastRequestId = _sendRequest(
-            req.encodeCBOR(),
-            subscriptionId,
-            gasLimit,
-            donID
-        );
-        return s_lastRequestId;
-    }
+
+    // function sendRequest(
+    //     string memory source,
+    //     bytes memory encryptedSecretsUrls,
+    //     uint8 donHostedSecretsSlotID,
+    //     uint64 donHostedSecretsVersion,
+    //     string[] memory args,
+    //     bytes[] memory bytesArgs,
+    //     uint64 subscriptionId,
+    //     uint32 gasLimit,
+    //     bytes32 donID
+    // ) external onlyOwner returns (bytes32 requestId) {
+    //     FunctionsRequest.Request memory req;
+    //     req.initializeRequestForInlineJavaScript(source);
+    //     if (encryptedSecretsUrls.length > 0)
+    //         req.addSecretsReference(encryptedSecretsUrls);
+    //     else if (donHostedSecretsVersion > 0) {
+    //         req.addDONHostedSecrets(
+    //             donHostedSecretsSlotID,
+    //             donHostedSecretsVersion
+    //         );
+    //     }
+    //     if (args.length > 0) req.setArgs(args);
+    //     if (bytesArgs.length > 0) req.setBytesArgs(bytesArgs);
+    //     s_lastRequestId = _sendRequest(
+    //         req.encodeCBOR(),
+    //         subscriptionId,
+    //         gasLimit,
+    //         donID
+    //     );
+    //     return s_lastRequestId;
+    // }
 
     /**
      * @notice Store latest result/error
@@ -117,6 +130,7 @@ contract BettingContract is
      * @param err Aggregated error from the user code or from the execution pipeline
      * Either response or error parameter will be set, but never both
      */
+
     function _fulfillRequest(
         bytes32 requestId,
         bytes memory response,
@@ -131,11 +145,15 @@ contract BettingContract is
 
     function registerGame(
         uint256 _fixtureId,
-        uint256 _gameStartTimeStamp
+        uint256 _gameStartTimeStamp,
+        bytes32 _OffChainHash
     ) public {
-        if (!games[_fixtureId].status) revert GameIsAlreadyRegistered();
+        if (games[_fixtureId].status) revert GameIsAlreadyRegistered();
         if (_gameStartTimeStamp < block.timestamp) revert TimeStampInPast();
-
+        bytes32 OnChainHash = keccak256(
+            abi.encodePacked(secretHash, _fixtureId, _gameStartTimeStamp)
+        );
+        if (_OffChainHash != OnChainHash) revert InvalidHash();
         games[_fixtureId].registrationTime = block.timestamp;
         games[_fixtureId].gameStartTimeStamp = _gameStartTimeStamp;
         games[_fixtureId].status = true;
@@ -145,9 +163,10 @@ contract BettingContract is
     function registerAndPredictGame(
         uint256 _fixtureId,
         uint256 _gameStartTimeStamp,
-        Result _result
+        Result _result,
+        bytes32 _OffChainHash
     ) external payable {
-        registerGame(_fixtureId, _gameStartTimeStamp);
+        registerGame(_fixtureId, _gameStartTimeStamp, _OffChainHash);
         predictGame(_fixtureId, _result);
     }
 
@@ -156,7 +175,9 @@ contract BettingContract is
         Result _result
     ) public payable activeGame(_fixtureId) {
         Game storage game = games[_fixtureId];
-        require(block.timestamp + 2 hours <= game.gameStartTimeStamp);
+        if (game.gameStartTimeStamp < block.timestamp + PREDICTION_BUFFER_TIME)
+            revert PredictionWindowClosed(_fixtureId);
+
         Prediction memory newPrediction = Prediction(
             msg.value,
             msg.sender,
@@ -203,13 +224,29 @@ contract BettingContract is
                     address(this).balance >= winningAmount,
                     "Contract does not have enough funds."
                 );
-
+                emit WinningAmountTransferred(
+                    _fixtureId,
+                    winningAmount,
+                    prediction.better
+                );
                 // Transfer winnings to the predictor
-                payable(prediction.better).transfer(winningAmount);
+                // bool success = to.send(amount);
+                // (bool success, ) = payable(prediction.better).call{value: winningAmount}("");
+                (bool success, ) = payable(prediction.better).call{
+                    value: winningAmount
+                }("");
+                require(success, "winning amount transfer not successfull");
             }
         }
         delete games[_fixtureId];
         // Optionally, reset the game data or mark it as distributed
+    }
+
+    function finaliseGameResults(
+        uint256 _fixtureId,
+        Result winningResult
+    ) public activeGame(_fixtureId) {
+        distributeWinnings(_fixtureId, winningResult);
     }
 
     function calculateWinnings(
@@ -228,6 +265,12 @@ contract BettingContract is
                     : game.weiCollectedForAway
             );
         return winnings;
+    }
+
+    function canPredictGame(uint256 _fixtureId) public view returns (bool) {
+        Game memory game = games[_fixtureId];
+        return
+            game.gameStartTimeStamp >= block.timestamp + PREDICTION_BUFFER_TIME;
     }
 
     function getCurrentTimeStamp() public view returns (uint) {
