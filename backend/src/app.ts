@@ -4,6 +4,7 @@
 import dataSourceRouter from "@routes/dataSource.routes";
 import { globalErrorHandler } from "@controllers/error.controller";
 import express from "express";
+import adminRouter from "@routes/admin.routes";
 // import { rateLimit } from "express-rate-limit";
 
 const app = express();
@@ -20,6 +21,8 @@ app.use(express.json());
 // app.use("/api", limiter);
 
 app.use("/api/data", dataSourceRouter);
+app.use("/api/admin", adminRouter);
+
 // app.use("/api/notes", notesRouter);
 
 //if no route is hit till this point then
