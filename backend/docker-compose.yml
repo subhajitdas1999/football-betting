@@ -1,0 +1,19 @@
+version: "3"
+services:
+  db:
+    image: "postgres:latest"
+    container_name: "db_betting"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=betApp
+    volumes:
+      - /data/postgres:/data/postgres
+    networks:
+      - be_network
+
+networks:
+  be_network:
+    driver: bridge
