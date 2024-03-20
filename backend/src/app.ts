@@ -1,10 +1,15 @@
 // import authRouter from "@routes/auth.routes";
 // import notesRouter from "@routes/notes.routes";
 // import { globalErrorHandler } from "@services/error.service";
-import dataSourceRouter from "@routes/dataSource.routes";
-import { globalErrorHandler } from "@controllers/error.controller";
+import {
+  BaseError,
+  globalErrorHandler,
+  HttpStatusCode,
+} from "@controllers/error.controller";
 import express from "express";
 import adminRouter from "@routes/admin.routes";
+import dataRouter from "@routes/data.routes";
+import cors from "cors";
 // import { rateLimit } from "express-rate-limit";
 
 const app = express();
@@ -17,10 +22,33 @@ app.use(express.json());
 //   message: "To many requests from this IP. Please try again after some time",
 // });
 
+const allowedOrigins =
+  process.env.ALLOWEDORIGINS?.split(",").map((url) => url.trim()) || [];
+
+const corsOptions = {
+  origin: (
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void
+  ) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log(`Request from disallowed origin: ${origin}`);
+      callback(
+        new BaseError(
+          HttpStatusCode.FORBIDDEN,
+          "Not Allowed",
+          "Not allowed by CORS"
+        )
+      );
+    }
+  },
+};
+app.use(cors(corsOptions));
 //Apply the rate limiting middleware to API calls only
 // app.use("/api", limiter);
 
-app.use("/api/data", dataSourceRouter);
+app.use("/api/data", dataRouter);
 app.use("/api/admin", adminRouter);
 
 // app.use("/api/notes", notesRouter);
