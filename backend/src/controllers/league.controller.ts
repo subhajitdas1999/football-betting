@@ -9,18 +9,9 @@ const prisma = new PrismaClient();
 
 dotenv.config({ path: "../.env" });
 
-export const addNewLeague = catchAsync(
+export const getAllLeagues = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const parsedBody = addNewLeagueInput.safeParse(req.body);
-    if (!parsedBody.success) {
-      throw new BaseError(
-        HttpStatusCode.UNPROCESSABLE_ENTITY,
-        "Invalid Input",
-        "Not valid input"
-      );
-    }
-
-    const league = await prisma.leagues.create({ data: parsedBody.data });
+    const league = await prisma.leagues.findMany();
 
     res.status(HttpStatusCode.OK).json({
       status: "success",
