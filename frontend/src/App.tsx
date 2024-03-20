@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Home from "./components/Home";
 import { Test } from "./components/Test";
 import { Web3Provider } from "./components/Web3Provider";
+import { Matches } from "./components/Matches";
 
 function App() {
   return (
@@ -15,8 +16,7 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Home />} />
-              {/* <Route path="about" element={<AboutPage />} /> */}
-              <Route path="/league/:id" element={<Test />} />
+              <Route path="/league/:id" element={<Matches />} />
             </Routes>
           </BrowserRouter>
           {/* Rest of your app content */}
