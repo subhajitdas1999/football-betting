@@ -27,15 +27,13 @@ export default function Home() {
   }, []);
   return (
     <div className="text-white overflow-hidden min-h-screen">
-      {" "}
-      {/* Added overflow-hidden */}
       <div className="container mx-auto p-4">
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2 w-fit mx-auto">SOME TEXT</h1>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           {data.map((ele, idx) => (
-            <Link to={`/league/${ele.leagueId}`} key={idx}>
+            <Link to={`/league/${ele.leagueId}-${ele.season}`} key={idx}>
               <div className="p-4 rounded-lg border-gray-300 border transform transition-all hover:scale-105">
                 <h2 className="text-2xl font-bold mb-2">{ele.name}</h2>
                 <p className="text-gray-400">Season {ele.season}</p>
@@ -45,8 +43,8 @@ export default function Home() {
                   src={ele.logo}
                   style={{
                     objectFit: "cover",
-                    width: "200px" /* Ensure width is handled responsively */,
-                    height: "auto" /* Set height to auto for responsiveness */,
+                    width: "200px",
+                    height: "auto",
                   }}
                 />
               </div>
