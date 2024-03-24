@@ -1,329 +1,85 @@
 // import { useAccount } from "wagmi";
 // import { config } from "./Web3Provider";
-import { useParams } from "react-router-dom";
+// import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-
-interface Fixture {
-  id: number;
-  referee: string | null;
-  timezone: string;
-  date: string;
-  timestamp: number;
-}
-
-interface Match {
-  fixture: Fixture;
-  // Add other properties as needed
-}
-const allMatches: Match[] = [
-  {
-    fixture: {
-      id: 1035464,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-30T20:30:00+05:30",
-      timestamp: 1711810800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035465,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-30T23:00:00+05:30",
-      timestamp: 1711819800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035466,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-31T01:30:00+05:30",
-      timestamp: 1711828800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035467,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-30T20:30:00+05:30",
-      timestamp: 1711810800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035468,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-31T18:30:00+05:30",
-      timestamp: 1711890000,
-    },
-  },
-  {
-    fixture: {
-      id: 1035469,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-31T21:00:00+05:30",
-      timestamp: 1711899000,
-    },
-  },
-  {
-    fixture: {
-      id: 1035470,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-30T18:00:00+05:30",
-      timestamp: 1711801800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035471,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-30T20:30:00+05:30",
-      timestamp: 1711810800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035472,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-30T20:30:00+05:30",
-      timestamp: 1711810800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035473,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-30T20:30:00+05:30",
-      timestamp: 1711810800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035474,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-04-03T00:15:00+05:30",
-      timestamp: 1712083500,
-    },
-  },
-  {
-    fixture: {
-      id: 1035475,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-04-04T00:00:00+05:30",
-      timestamp: 1712169000,
-    },
-  },
-  {
-    fixture: {
-      id: 1035476,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-04-04T00:00:00+05:30",
-      timestamp: 1712169000,
-    },
-  },
-  {
-    fixture: {
-      id: 1035464,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-30T20:30:00+05:30",
-      timestamp: 1711810800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035465,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-30T23:00:00+05:30",
-      timestamp: 1711819800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035466,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-31T01:30:00+05:30",
-      timestamp: 1711828800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035467,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-30T20:30:00+05:30",
-      timestamp: 1711810800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035468,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-31T18:30:00+05:30",
-      timestamp: 1711890000,
-    },
-  },
-  {
-    fixture: {
-      id: 1035469,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-31T21:00:00+05:30",
-      timestamp: 1711899000,
-    },
-  },
-  {
-    fixture: {
-      id: 1035470,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-30T18:00:00+05:30",
-      timestamp: 1711801800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035471,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-30T20:30:00+05:30",
-      timestamp: 1711810800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035472,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-30T20:30:00+05:30",
-      timestamp: 1711810800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035473,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-03-30T20:30:00+05:30",
-      timestamp: 1711810800,
-    },
-  },
-  {
-    fixture: {
-      id: 1035474,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-04-03T00:15:00+05:30",
-      timestamp: 1712083500,
-    },
-  },
-  {
-    fixture: {
-      id: 1035475,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-04-04T00:00:00+05:30",
-      timestamp: 1712169000,
-    },
-  },
-  {
-    fixture: {
-      id: 1035476,
-      referee: null,
-      timezone: "Asia/Kolkata",
-      date: "2024-04-04T00:00:00+05:30",
-      timestamp: 1712169000,
-    },
-  },
-];
+import { MatchCard } from "./MatchCard";
+import { Match } from "../interfaces";
+import axios from "axios";
+import { useParams } from "react-router-dom";
+import { MatchCardPlaceholder } from "./MatchCardPlaceholder";
 
 export const Matches = () => {
   // const { isConnected, address } = useAccount({ config: config });
   const { id } = useParams<{ id: string }>();
   const [league, season] = (id as string).split("-");
   const [matches, setMatches] = useState<Match[]>([]);
+  const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
-  const pageSize = 15;
+  const pageSize = 16;
   const [hasMore, setHasMore] = useState<boolean>(true);
-  console.log(league, season);
-
+  // console.log(league, season);
+  // Fetch all matches once
   useEffect(() => {
-    // Simulated fetch of all matches for the league
-    const fetchMatches = async () => {
-      setLoading(true);
-      try {
-        // Simulated API call to fetch all matches for the league
-        const data: Match[] = await fetchMatchesFromServer(page);
-        // setMatches(data);
-        setMatches((prevMatches) => [...prevMatches, ...data]);
-        if (allMatches.length <= page * pageSize) {
-          setHasMore(false); // No more data available
-        }
-      } catch (error) {
-        console.error("Error fetching matches:", error);
-      } finally {
-        setLoading(false);
-      }
+    setLoading(true);
+    const params = { league, season, timezone: "Asia/Kolkata", status: "NS" };
+    const headers = {
+      "Content-Type": "application/json",
+      "x-rapidapi-key": import.meta.env.VITE_APISPORTSKEY,
+      "x-rapidapi-host": import.meta.env.VITE_APISPORTSHOST,
     };
+    axios
+      .get("https://v3.football.api-sports.io/fixtures", { headers, params })
+      .then((response) => {
+        setAllMatches(response.data.response);
+      })
+      .catch((error) => console.log(error))
+      .finally(() => setLoading(false));
+  }, [league, season]); // Depends on league and season
 
-    fetchMatches();
-  }, [page]);
+  // Handle infinite scroll and data slicing
+  useEffect(() => {
+    if (!loading && allMatches.length) {
+      const newData = allMatches.slice((page - 1) * pageSize, page * pageSize);
+      setMatches((prevMatches) => [...prevMatches, ...newData]);
+      setHasMore(newData.length === pageSize);
+    }
+  }, [page, allMatches, loading]); // Now also depends on allMatches
 
+  // Infinite scroll logic remains the same
   useEffect(() => {
     const handleScroll = () => {
       if (
-        window.innerHeight + document.documentElement.scrollTop ===
-          document.documentElement.offsetHeight &&
+        window.innerHeight + document.documentElement.scrollTop >=
+          document.documentElement.offsetHeight - 10 &&
         !loading &&
         hasMore
       ) {
-        setPage((prevPage) => prevPage + 1); // Load next page of matches
+        setPage((prevPage) => prevPage + 1);
       }
     };
 
     window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore, loading]);
-
-  // Function to simulate fetching all matches for the league from the server
-  const fetchMatchesFromServer = async (page: number): Promise<Match[]> => {
-    // Simulated delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    // Simulated data
-    const newData = allMatches.slice((page - 1) * pageSize, page * pageSize);
-    return newData;
-  };
 
   return (
     <div>
-      <h2>Matches Component</h2>
-      {matches.map((match) => (
-        <div key={match.fixture.id} className="match">
-          <p>Match ID: {match.fixture.id}</p>
-          <p>Referee: {match.fixture.referee || "N/A"}</p>
-          <p>Date: {new Date(match.fixture.date).toLocaleString()}</p>
-          {/* Render other match details */}
-        </div>
-      ))}
-      {loading && <p>Loading...</p>}
+      <div className="mt-6">
+        <h1 className="text-3xl font-bold mb-2 w-fit mx-auto">
+          Upcoming Matches
+        </h1>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        {loading
+          ? Array.from({ length: pageSize }).map((_, idx) => (
+              <MatchCardPlaceholder key={idx} />
+            ))
+          : matches.map(
+              (match, idx) => <MatchCard data={match} key={idx} />
+              // </Link>
+            )}
+      </div>
     </div>
   );
 };
