@@ -18,15 +18,6 @@ export const MatchCard: React.FC<Props> = ({ data }) => {
   const handleCloseModal = () => {
     setIsModalOpen(false); // Close the modal
   };
-  const handleTeam1Click = () => {
-    console.log(`You clicked ${data.teams.home.name}`);
-    // You can add additional logic here
-  };
-
-  const handleTeam2Click = () => {
-    console.log(`You clicked ${data.teams.away.name}`);
-    // You can add additional logic here
-  };
 
   return (
     <div className="p-4 rounded-lg border border-gray-300 transform transition-all hover:scale-105 max-w-xl mx-auto w-full">
@@ -66,17 +57,17 @@ export const MatchCard: React.FC<Props> = ({ data }) => {
               Predict
             </button>
           </div>
-          <div className="py-2 px-4">Amount of Matic:12.044</div>
+          <div className="py-2 px-4">Total Invested : 12.044 Matic</div>
         </div>
-        <PredictionProgressBar homeCount={10} awayCount={36} />
+        <PredictionProgressBar homeCount={0} awayCount={0} />
       </div>
       <PredictModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        team1={data.teams.home.name}
-        team2={data.teams.away.name}
-        onTeam1Click={handleTeam1Click}
-        onTeam2Click={handleTeam2Click}
+        fixtureId={data.fixture.id}
+        gameStartTimeStamp={data.fixture.timestamp}
+        home={data.teams.home.name}
+        away={data.teams.away.name}
       />
     </div>
   );
