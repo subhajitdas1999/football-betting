@@ -14,3 +14,11 @@ export const formatDateTime = (dateTimeString: string) => {
 
   return formattedDate;
 };
+
+import axios from "axios";
+
+export const axiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_BACKEND_URL, // Replace with your backend URL
+  timeout: 5000, // Adjust timeout as needed
+  // You can also add other configuration options here
+});
