@@ -17,10 +17,27 @@ model Leagues {
   id        String   @id @default(uuid())
   name      String
   logo      String
-  season    Decimal
+  season    Int
   start     String
   end       String
-  leagueId  Decimal
+  leagueId  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+}
+
+enum Result {
+  home
+  away
+}
+
+model Predictions {
+  id            String   @id @default(uuid())
+  team          Result
+  fixtureId     Int
+  amount        Decimal
+  chain         String
+  walletAddress String
+  leagueId      Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
 }
