@@ -2,23 +2,28 @@ import { useState } from "react";
 import ReactDOM from "react-dom";
 import polygonIcon from "../assets/polygon.png";
 import closeIcon from "../assets/close.png";
+import { axiosInstance } from "../utils";
+import { BettingContractAbi } from "../abi/bettingContract";
+import { parseEther } from "viem";
+import { writeContract } from "@wagmi/core";
+import { config } from "./Web3Provider";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  team1: string;
-  team2: string;
-  onTeam1Click: () => void;
-  onTeam2Click: () => void;
+  fixtureId: number;
+  gameStartTimeStamp: number;
+  home: string;
+  away: string;
 }
 
 export const PredictModal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
-  team1,
-  team2,
-  onTeam1Click,
-  onTeam2Click,
+  fixtureId,
+  gameStartTimeStamp,
+  home,
+  away,
 }) => {
   const [amount, setAmount] = useState("");
 
@@ -27,6 +32,47 @@ export const PredictModal: React.FC<ModalProps> = ({
     onClose();
   };
 
+  const handleTeam1Click = () => {
+    handleTeamClick("home");
+    // You can add additional logic here
+  };
+
+  const handleTeam2Click = () => {
+    handleTeamClick("away");
+
+    // You can add additional logic here
+  };
+  const handleTeamClick = async (team: string) => {
+    //will check if the fixture ID game already present
+
+    const res = await axiosInstance.get("/v1/prediction/check", {
+      params: { fixtureId, gameStartTimeStamp },
+    });
+    console.log({ res });
+
+    if (!res.data.data) {
+      console.log("here");
+
+      //register and predict
+      const result = await writeContract(config, {
+        abi: BettingContractAbi,
+        address: "0xC1A566F0a33549bAa344e23282705A7008dCb4E8",
+        functionName: "registerAndPredictGame",
+        args: [
+          fixtureId,
+          gameStartTimeStamp,
+          team === "home" ? 0 : 1,
+          res.data.offChainHash,
+        ],
+        value: parseEther(amount),
+      });
+      console.log({ result });
+    } else {
+      //predict
+    }
+    //then check from smart contract
+    console.log(team, res.data);
+  };
   if (!isOpen) return null;
 
   const modalContent = (
@@ -58,16 +104,16 @@ export const PredictModal: React.FC<ModalProps> = ({
         </div>
         <div className="flex justify-between pt-4">
           <button
-            onClick={onTeam1Click}
+            onClick={handleTeam1Click}
             className="px-4 py-2 border rounded bg-gray-700 hover:bg-gray-600 w-full mr-2"
           >
-            {team1}
+            {home}
           </button>
           <button
-            onClick={onTeam2Click}
+            onClick={handleTeam2Click}
             className="px-4 py-2 border rounded bg-gray-700 hover:bg-gray-600 w-full ml-2"
           >
-            {team2}
+            {away}
           </button>
         </div>
       </div>
