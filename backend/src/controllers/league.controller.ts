@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import { BaseError, HttpStatusCode, catchAsync } from "./error.controller";
 import axios from "axios";
 import dotenv from "dotenv";
-import { addNewLeagueInput } from "validators/input.validator";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
