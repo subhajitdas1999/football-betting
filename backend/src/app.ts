@@ -10,6 +10,7 @@ import express from "express";
 import adminRouter from "@routes/admin.routes";
 import dataRouter from "@routes/data.routes";
 import cors from "cors";
+import predictionRouter from "@routes/prediction.routes";
 // import { rateLimit } from "express-rate-limit";
 
 const app = express();
@@ -50,6 +51,7 @@ app.use(cors(corsOptions));
 
 app.use("/api/data", dataRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/v1/prediction", predictionRouter);
 
 // app.use("/api/notes", notesRouter);
 
