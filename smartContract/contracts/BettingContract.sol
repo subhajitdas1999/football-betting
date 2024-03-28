@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.21;
+pragma solidity 0.8.21;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {FunctionsClientUpgradeable} from "./FunctionsClientUpgradeable.sol";
-import {FunctionsRequest} from "@chainlink/contracts@0.8.0/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
+import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
 
 contract BettingContract is
     OwnableUpgradeable,
@@ -65,7 +65,7 @@ contract BettingContract is
         _;
     }
 
-    /// @custom:oz-upgrades-unsafe-allow-cosntructor
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }

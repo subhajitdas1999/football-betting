@@ -2,11 +2,11 @@
 
 pragma solidity ^0.8.19;
 
-import {IFunctionsRouter} from "@chainlink/contracts@0.8.0/src/v0.8/functions/dev/v1_0_0/interfaces/IFunctionsRouter.sol";
-import {IFunctionsClient} from "@chainlink/contracts@0.8.0/src/v0.8/functions/dev/v1_0_0/interfaces/IFunctionsClient.sol";
+import {IFunctionsRouter} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/interfaces/IFunctionsRouter.sol";
+import {IFunctionsClient} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/interfaces/IFunctionsClient.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import {FunctionsRequest} from "@chainlink/contracts@0.8.0/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
+import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
 
 /// @title The Chainlink Functions client contract
 /// @notice Contract developers can inherit this contract in order to make Chainlink Functions requests
