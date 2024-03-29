@@ -35,5 +35,6 @@ export const addPredictionInput = z.object({
   fixtureId: z.string().transform((val) => parseInt(val)),
   chain: z.string(),
   walletAddress: z.string(),
-  leagueId: z.string().transform((val) => parseInt(val)),
+  txHash: z.string(),
+  leagueIdSeason: z.string(),
 });
