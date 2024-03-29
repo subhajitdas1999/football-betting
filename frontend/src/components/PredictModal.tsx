@@ -5,8 +5,13 @@ import closeIcon from "../assets/close.png";
 import { axiosInstance } from "../utils";
 import { BettingContractAbi } from "../abi/bettingContract";
 import { parseEther } from "viem";
-import { writeContract } from "@wagmi/core";
+import { writeContract, readContract } from "@wagmi/core";
 import { config } from "./Web3Provider";
+import { useAccount } from "wagmi";
+// import { getClient } from "@wagmi/core";
+// import { waitForTransactionReceipt } from "viem/actions";
+// import { defaultWagmiConfig } from "../utils/defaultWagmiConfig";
+// import { defaultWagmiConfig } from "../utils/defaultWagmiConfig";
 
 interface ModalProps {
   isOpen: boolean;
@@ -26,6 +31,7 @@ export const PredictModal: React.FC<ModalProps> = ({
   away,
 }) => {
   const [amount, setAmount] = useState("");
+  const { isConnected, address } = useAccount({ config: config });
 
   const handleClose = () => {
     setAmount("");
@@ -44,34 +50,80 @@ export const PredictModal: React.FC<ModalProps> = ({
   };
   const handleTeamClick = async (team: string) => {
     //will check if the fixture ID game already present
-
-    const res = await axiosInstance.get("/v1/prediction/check", {
-      params: { fixtureId, gameStartTimeStamp },
-    });
-    console.log({ res });
-
-    if (!res.data.data) {
-      console.log("here");
-
-      //register and predict
-      const result = await writeContract(config, {
+    if (isConnected) {
+      const res = await axiosInstance.get("/v1/prediction/check", {
+        params: { fixtureId, gameStartTimeStamp },
+      });
+      console.log({ res });
+      //then check from smart contract
+      const canPredict = await readContract(config, {
         abi: BettingContractAbi,
         address: "0xC1A566F0a33549bAa344e23282705A7008dCb4E8",
-        functionName: "registerAndPredictGame",
-        args: [
-          fixtureId,
-          gameStartTimeStamp,
-          team === "home" ? 0 : 1,
-          res.data.offChainHash,
-        ],
-        value: parseEther(amount),
+        functionName: "canPredictGame",
+        args: [fixtureId],
       });
-      console.log({ result });
+      let result;
+      try {
+        if (!res.data.data) {
+          console.log("here register");
+
+          //register and predict
+          result = await writeContract(config, {
+            abi: BettingContractAbi,
+            address: "0xC1A566F0a33549bAa344e23282705A7008dCb4E8",
+            functionName: "registerAndPredictGame",
+            args: [
+              fixtureId,
+              gameStartTimeStamp,
+              team === "home" ? 0 : 1,
+              res.data.offChainHash,
+            ],
+            value: parseEther(amount),
+          });
+          console.log({ result });
+        } else {
+          //predict
+          if (canPredict) {
+            console.log("here predict");
+            result = await writeContract(config, {
+              abi: BettingContractAbi,
+              address: "0xC1A566F0a33549bAa344e23282705A7008dCb4E8",
+              functionName: "predictGame",
+              args: [fixtureId, team === "home" ? 0 : 1],
+              value: parseEther(amount),
+            });
+            console.log({ result });
+          } else {
+            //can not predict
+            alert("Cannot predict this game");
+          }
+        }
+        // const client = getClient(defaultWagmiConfig);
+        // const transactionReceipt = waitForTransactionReceipt(client, {
+        //   hash: result as `0x${string}`,
+        // });
+        // console.log(transactionReceipt);
+
+        //save the data to db
+        await axiosInstance.post("/v1/prediction/add", {
+          team,
+          amount: amount,
+          fixtureId: fixtureId.toString(),
+          chain: "MATIC",
+          walletAddress: address,
+          txHash: result,
+          leagueIdSeason: "39-2023",
+        });
+      } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-expect-error
+        alert(err.shortMessage);
+      }
+
+      // console.log(canPredict);
     } else {
-      //predict
+      alert("Connect you Wallet");
     }
-    //then check from smart contract
-    console.log(team, res.data);
   };
   if (!isOpen) return null;
 
