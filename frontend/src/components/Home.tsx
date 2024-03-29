@@ -17,7 +17,7 @@ export default function Home() {
 
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_BACKEND_URL}/api/data/getAllLeagues`)
+      .get(`${import.meta.env.VITE_BACKEND_URL}/data/getAllLeagues`)
       .then((response) => {
         setData(response.data.data);
       })
