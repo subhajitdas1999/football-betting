@@ -1,6 +1,8 @@
+import { formatEther } from "viem";
+
 interface PropsPredictionProgressBar {
-  homeCount: number;
-  awayCount: number;
+  homeCount: bigint;
+  awayCount: bigint;
 }
 
 export const PredictionProgressBar: React.FC<PropsPredictionProgressBar> = ({
@@ -9,8 +11,17 @@ export const PredictionProgressBar: React.FC<PropsPredictionProgressBar> = ({
 }) => {
   // Calculate percentages for home and away teams
   const totalPredictions = homeCount + awayCount;
-  const homePercentage = (homeCount / totalPredictions) * 100;
-  const awayPercentage = (awayCount / totalPredictions) * 100;
+  const homePercentage =
+    totalPredictions === BigInt(0)
+      ? 0
+      : (homeCount / totalPredictions) * BigInt(100);
+  const awayPercentage =
+    totalPredictions === BigInt(0)
+      ? 0
+      : (awayCount / totalPredictions) * BigInt(100);
+  const parsedHomeCount = formatEther(homeCount);
+  const parsedAwayCount = formatEther(awayCount);
+  // const parsedTotalPredictions = formatEther(totalPredictions)
 
   return (
     <div className="w-full h-8 bg-gray-200 rounded-full overflow-hidden group">
@@ -18,21 +29,21 @@ export const PredictionProgressBar: React.FC<PropsPredictionProgressBar> = ({
         <div
           className="bg-blue-500 relative flex items-center justify-center group-hover:bg-blue-700 transition-colors duration-300"
           style={{ width: `${homePercentage}%` }}
-          title={`Home: ${homeCount}`} // For non-CSS based tooltips
+          title={`Home: ${parsedHomeCount}`} // For non-CSS based tooltips
         >
           {/* The actual text should be hidden by default and only shown on hover */}
           <span className="opacity-0 group-hover:opacity-100 absolute">
-            {homeCount}
+            {parsedHomeCount}
           </span>
         </div>
         <div
           className="bg-green-500 relative flex items-center justify-center group-hover:bg-green-700 transition-colors duration-300"
           style={{ width: `${awayPercentage}%` }}
-          title={`Away: ${awayCount}`} // For non-CSS based tooltips
+          title={`Away: ${parsedAwayCount}`} // For non-CSS based tooltips
         >
           {/* Same as above for the away side */}
           <span className="opacity-0 group-hover:opacity-100 absolute">
-            {awayCount}
+            {parsedAwayCount}
           </span>
         </div>
       </div>
