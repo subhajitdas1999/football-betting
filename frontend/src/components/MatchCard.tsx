@@ -1,8 +1,13 @@
-import { useState } from "react";
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import { useEffect, useState } from "react";
 import { Match } from "../interfaces";
 import { formatDateTime } from "../utils";
 import { PredictionProgressBar } from "./PredictionProgressBar";
 import { PredictModal } from "./PredictModal";
+import { BettingContractAbi } from "../abi/bettingContract";
+import { readContract } from "wagmi/actions";
+import { config } from "./Web3Provider";
+import { formatEther } from "viem";
 
 interface Props {
   data: Match;
@@ -10,6 +15,8 @@ interface Props {
 
 export const MatchCard: React.FC<Props> = ({ data }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [homeCount, setHomeCount] = useState(BigInt(0));
+  const [awayCount, setAwayCount] = useState(BigInt(0));
 
   const handlePredictClick = () => {
     setIsModalOpen(true); // Open the modal
@@ -18,6 +25,21 @@ export const MatchCard: React.FC<Props> = ({ data }) => {
   const handleCloseModal = () => {
     setIsModalOpen(false); // Close the modal
   };
+
+  useEffect(() => {
+    (async () => {
+      const game = await readContract(config, {
+        abi: BettingContractAbi,
+        address: "0xC1A566F0a33549bAa344e23282705A7008dCb4E8",
+        functionName: "games",
+        args: [data.fixture.id],
+      });
+      ///@ts-expect-error
+      setHomeCount(game[2]);
+      ///@ts-expect-error
+      setAwayCount(game[3]);
+    })();
+  }, [data.fixture.id]);
 
   return (
     <div className="p-4 rounded-lg border border-gray-300 transform transition-all hover:scale-105 max-w-xl mx-auto w-full">
@@ -57,9 +79,11 @@ export const MatchCard: React.FC<Props> = ({ data }) => {
               Predict
             </button>
           </div>
-          <div className="py-2 px-4">Total Invested : 12.044 Matic</div>
+          <div className="py-2 px-4">
+            Total Invested : {formatEther(homeCount + awayCount)} Matic
+          </div>
         </div>
-        <PredictionProgressBar homeCount={0} awayCount={0} />
+        <PredictionProgressBar homeCount={homeCount} awayCount={awayCount} />
       </div>
       <PredictModal
         isOpen={isModalOpen}
