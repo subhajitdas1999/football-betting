@@ -39,6 +39,7 @@ model Predictions {
   walletAddress  String
   txHash         String
   leagueIdSeason String
+  isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now()) @updatedAt
 }
