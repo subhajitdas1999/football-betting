@@ -242,7 +242,7 @@ contract BettingContract is
         // Optionally, reset the game data or mark it as distributed
     }
 
-    function finaliseGameResults(
+    function finalizeGameResults(
         uint256 _fixtureId,
         Result winningResult
     ) public activeGame(_fixtureId) {
