@@ -38,3 +38,7 @@ export const addPredictionInput = z.object({
   txHash: z.string(),
   leagueIdSeason: z.string(),
 });
+
+export const getAllPredictionInput = z.object({
+  walletAddress: z.string().optional(),
+});
