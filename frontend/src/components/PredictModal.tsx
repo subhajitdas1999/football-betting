@@ -8,10 +8,9 @@ import { parseEther } from "viem";
 import { writeContract, readContract } from "@wagmi/core";
 import { config } from "./Web3Provider";
 import { useAccount } from "wagmi";
-// import { getClient } from "@wagmi/core";
-// import { waitForTransactionReceipt } from "viem/actions";
-// import { defaultWagmiConfig } from "../utils/defaultWagmiConfig";
-// import { defaultWagmiConfig } from "../utils/defaultWagmiConfig";
+import { getClient } from "@wagmi/core";
+import { waitForTransactionReceipt } from "viem/actions";
+import { defaultWagmiConfig } from "../utils/defaultWagmiConfig";
 
 interface ModalProps {
   isOpen: boolean;
@@ -98,11 +97,12 @@ export const PredictModal: React.FC<ModalProps> = ({
             alert("Cannot predict this game");
           }
         }
-        // const client = getClient(defaultWagmiConfig);
-        // const transactionReceipt = waitForTransactionReceipt(client, {
-        //   hash: result as `0x${string}`,
-        // });
-        // console.log(transactionReceipt);
+        const client = getClient(defaultWagmiConfig);
+        const transactionReceipt = await waitForTransactionReceipt(client, {
+          confirmations: 3,
+          hash: result as `0x${string}`,
+        });
+        console.log(transactionReceipt);
 
         //save the data to db
         await axiosInstance.post("/v1/prediction/add", {
