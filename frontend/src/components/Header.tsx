@@ -1,7 +1,7 @@
 import React from "react";
 import { ConnectKitButton } from "connectkit";
 
-const ExampleButton = () => {
+export const ConnectButton = () => {
   return (
     <ConnectKitButton.Custom>
       {({ isConnected, show, address }) => {
@@ -26,7 +26,7 @@ const Header: React.FC = () => {
       {/* Logo */}
       <div className="text-white font-bold text-xl">My App</div>
 
-      <ExampleButton />
+      <ConnectButton />
     </header>
   );
 };
