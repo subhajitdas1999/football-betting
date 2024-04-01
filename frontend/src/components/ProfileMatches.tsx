@@ -76,7 +76,7 @@ export const ProfileMatches = () => {
     }
   }, [address, isConnected]);
 
-  if (loading) {
+  if (isConnected && loading) {
     return <div>Loading matches...</div>;
   }
 
@@ -156,8 +156,6 @@ const PredictionRow: React.FC<{ prediction: Prediction; teamName: string }> = ({
   prediction,
   teamName,
 }) => {
-  console.log(teamName);
-
   const receivedAmount = 0; // Replace with actual calculation logic
 
   return (
