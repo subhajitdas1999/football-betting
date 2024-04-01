@@ -31,7 +31,9 @@ export const Matches = () => {
     axios
       .get("https://v3.football.api-sports.io/fixtures", { headers, params })
       .then((response) => {
-        setAllMatches(response.data.response);
+        const matches: Match[] = response.data.response;
+        matches.sort((a, b) => a.fixture.timestamp - b.fixture.timestamp);
+        setAllMatches(matches);
       })
       .catch((error) => console.log(error))
       .finally(() => setLoading(false));
