@@ -30,6 +30,11 @@ enum Result {
   away
 }
 
+enum Status {
+  NS
+  Competed
+}
+
 model Predictions {
   id             String   @id @default(uuid())
   team           Result
@@ -39,6 +44,7 @@ model Predictions {
   walletAddress  String
   txHash         String
   leagueIdSeason String
+  status         Status   @default(NS)
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now()) @updatedAt
