@@ -95,11 +95,20 @@ export const getAllPredictions = catchAsync(
     let ids = [...idsSet].join("-");
 
     const matchData = await getPredictedMatchData(ids);
-
+    const finishedMatchId: number[] = [];
     const modifyResult = matchData.map((md: any) => {
       const specificPredictions = predictions.filter(
         (p) => p.fixtureId === md.fixture.id
       );
+      const status = md.fixture.status.short;
+      // if (
+      //   (status === "FT" || status === "AET" || status === "PEN") &&
+      //   specificPredictions[0].status === "NS"
+      // ) {
+      //   finishedMatchId.push(md.fixture.id);
+      // }
+      finishedMatchId.push(md.fixture.id);
+
       return {
         ...md,
         predictions: specificPredictions,
@@ -111,6 +120,10 @@ export const getAllPredictions = catchAsync(
       dataLength: modifyResult.length,
       data: modifyResult,
     });
+
+    if (finishedMatchId.length > 0) {
+      solveFinishedMatches(finishedMatchId);
+    }
   }
 );
 
@@ -146,4 +159,31 @@ const getPredictedMatchData = async (ids: string) => {
     modifyResult.push(matchData);
   });
   return modifyResult;
+};
+
+const solveFinishedMatches = async (fixturesIds: number[]) => {
+  console.log("starting in solveFinishedMatches", Date.now());
+
+  // console.log(fixturesIds);
+  for (let i in fixturesIds) {
+    await handleFinishMatches(parseInt(i));
+  }
+
+  // return new Promise<string[]>((resolve) => {
+  //   setTimeout(() => {
+  //     resolve(["x", "y"]); // Example data
+  //   }, 1000); // Simulated delay of 1 second
+  // });
+
+  console.log("finished in solveFinishedMatches", Date.now());
+};
+
+const handleFinishMatches = async (fixtureId: number) => {
+  console.log("Inside handleFinishMatches", Date.now());
+
+  return new Promise<number[]>((resolve) => {
+    setTimeout(() => {
+      resolve([fixtureId]); // Example data
+    }, 2000); // Simulated delay of 1 second
+  });
 };
