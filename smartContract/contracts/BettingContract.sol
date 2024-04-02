@@ -51,6 +51,7 @@ contract BettingContract is
         uint256 winningAmount,
         address winner
     );
+    event RequestFulfilled(bytes s_lastResponse);
 
     //Errors
     error GameIsNotActive();
@@ -91,37 +92,37 @@ contract BettingContract is
      * @param subscriptionId Billing ID
      */
 
-    // function sendRequest(
-    //     string memory source,
-    //     bytes memory encryptedSecretsUrls,
-    //     uint8 donHostedSecretsSlotID,
-    //     uint64 donHostedSecretsVersion,
-    //     string[] memory args,
-    //     bytes[] memory bytesArgs,
-    //     uint64 subscriptionId,
-    //     uint32 gasLimit,
-    //     bytes32 donID
-    // ) external onlyOwner returns (bytes32 requestId) {
-    //     FunctionsRequest.Request memory req;
-    //     req.initializeRequestForInlineJavaScript(source);
-    //     if (encryptedSecretsUrls.length > 0)
-    //         req.addSecretsReference(encryptedSecretsUrls);
-    //     else if (donHostedSecretsVersion > 0) {
-    //         req.addDONHostedSecrets(
-    //             donHostedSecretsSlotID,
-    //             donHostedSecretsVersion
-    //         );
-    //     }
-    //     if (args.length > 0) req.setArgs(args);
-    //     if (bytesArgs.length > 0) req.setBytesArgs(bytesArgs);
-    //     s_lastRequestId = _sendRequest(
-    //         req.encodeCBOR(),
-    //         subscriptionId,
-    //         gasLimit,
-    //         donID
-    //     );
-    //     return s_lastRequestId;
-    // }
+    function sendRequest(
+        string memory source,
+        bytes memory encryptedSecretsUrls,
+        uint8 donHostedSecretsSlotID,
+        uint64 donHostedSecretsVersion,
+        string[] memory args,
+        bytes[] memory bytesArgs,
+        uint64 subscriptionId,
+        uint32 gasLimit,
+        bytes32 donID
+    ) external onlyOwner returns (bytes32 requestId) {
+        FunctionsRequest.Request memory req;
+        req.initializeRequestForInlineJavaScript(source);
+        if (encryptedSecretsUrls.length > 0)
+            req.addSecretsReference(encryptedSecretsUrls);
+        else if (donHostedSecretsVersion > 0) {
+            req.addDONHostedSecrets(
+                donHostedSecretsSlotID,
+                donHostedSecretsVersion
+            );
+        }
+        if (args.length > 0) req.setArgs(args);
+        if (bytesArgs.length > 0) req.setBytesArgs(bytesArgs);
+        s_lastRequestId = _sendRequest(
+            req.encodeCBOR(),
+            subscriptionId,
+            gasLimit,
+            donID
+        );
+        return s_lastRequestId;
+    }
 
     /**
      * @notice Store latest result/error
@@ -141,6 +142,7 @@ contract BettingContract is
         }
         s_lastResponse = response;
         s_lastError = err;
+        emit RequestFulfilled(s_lastResponse);
     }
 
     function registerGame(
