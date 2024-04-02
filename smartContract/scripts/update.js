@@ -1,13 +1,11 @@
 const { ethers, upgrades } = require("hardhat");
 
-const proxyAddress = "0xE6a9DE39B9Bc5C0a4F4Db1d579cb643a8878aa78";
+const proxyAddress = "0xC1A566F0a33549bAa344e23282705A7008dCb4E8";
 
 async function main() {
-  const CarbonCreditMarketPlaceV3 = await ethers.getContractFactory(
-    "CarbonCreditMarketPlaceV3"
-  );
-  await upgrades.upgradeProxy(proxyAddress, CarbonCreditMarketPlaceV3);
-  console.log("New Marketplace implementation added");
+  const BettingContract = await ethers.getContractFactory("BettingContract");
+  await upgrades.upgradeProxy(proxyAddress, BettingContract);
+  console.log("New BettingContract implementation added");
 }
 
 main().catch((error) => {
