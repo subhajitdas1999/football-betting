@@ -9,6 +9,13 @@ import { PrismaClient } from "@prisma/client";
 import { ethers } from "ethers";
 import dotenv from "dotenv";
 import axios from "axios";
+import fs from "fs";
+import path from "path";
+import functionsConsumerAbi from "@contracts/BettingContract";
+import {
+  FulfillmentCode,
+  ResponseListener,
+} from "@chainlink/functions-toolkit";
 dotenv.config({ path: "../.env" });
 
 const prisma = new PrismaClient();
@@ -29,7 +36,7 @@ export const checkPrediction = catchAsync(
         fixtureId: parsedBody.data.fixtureId,
       },
     });
-    const offChainHash = ethers.solidityPackedKeccak256(
+    const offChainHash = ethers.utils.solidityKeccak256(
       ["bytes32", "uint256", "uint256"],
       [
         process.env.SECRETHASH,
@@ -95,7 +102,7 @@ export const getAllPredictions = catchAsync(
     let ids = [...idsSet].join("-");
 
     const matchData = await getPredictedMatchData(ids);
-    const finishedMatchId: number[] = [];
+    let finishedMatchId: number[] = [];
     const modifyResult = matchData.map((md: any) => {
       const specificPredictions = predictions.filter(
         (p) => p.fixtureId === md.fixture.id
@@ -114,7 +121,7 @@ export const getAllPredictions = catchAsync(
         predictions: specificPredictions,
       };
     });
-
+    // finishedMatchId = [1035037];
     res.status(HttpStatusCode.OK).json({
       status: "success",
       dataLength: modifyResult.length,
@@ -169,21 +176,83 @@ const solveFinishedMatches = async (fixturesIds: number[]) => {
     await handleFinishMatches(parseInt(i));
   }
 
-  // return new Promise<string[]>((resolve) => {
-  //   setTimeout(() => {
-  //     resolve(["x", "y"]); // Example data
-  //   }, 1000); // Simulated delay of 1 second
-  // });
-
   console.log("finished in solveFinishedMatches", Date.now());
 };
 
 const handleFinishMatches = async (fixtureId: number) => {
   console.log("Inside handleFinishMatches", Date.now());
 
-  return new Promise<number[]>((resolve) => {
-    setTimeout(() => {
-      resolve([fixtureId]); // Example data
-    }, 2000); // Simulated delay of 1 second
-  });
+  await makeRequestMumbai(fixtureId);
+};
+
+const makeRequestMumbai = async (fixtureId: number) => {
+  const consumerAddress = "0xc1a566f0a33549baa344e23282705a7008dcb4e8"; //In My case betting contract is the
+  const subscriptionId = 1340; // chainlink function subscription id
+  // hardcoded for Polygon Mumbai
+  // const routerAddress = "0x6E2dc0F9DB014aE19888F539E59285D2Ea04244C";
+  // const linkTokenAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
+  const donId = "fun-polygon-mumbai-1";
+  const explorerUrl = "https://mumbai.polygonscan.com";
+
+  // Initialize functions settings
+  const source = fs
+    .readFileSync(path.resolve(__dirname, "../utils/source.js"))
+    .toString();
+
+  const args = [
+    String(fixtureId),
+    "FT-AET-PEN",
+    process.env.APISPORTSKEY,
+    process.env.APISPORTSHOST,
+  ];
+  const gasLimit = 300000;
+
+  // Initialize ethers signer and provider to interact with the contracts onchain
+  const privateKey = process.env.PRIVATE_KEY; // fetch PRIVATE_KEY
+  if (!privateKey)
+    throw new Error(
+      "private key not provided - check your environment variables"
+    );
+
+  const rpcUrl = process.env.POLYGON_MUMBAI_RPC_URL; // fetch mumbai RPC URL
+
+  if (!rpcUrl)
+    throw new Error(`rpcUrl not provided  - check your environment variables`);
+
+  const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+
+  const wallet = new ethers.Wallet(privateKey);
+  const signer = wallet.connect(provider); // create ethers signer for signing transactions
+
+  //////// MAKE REQUEST ////////
+
+  console.log("\nMake request...");
+
+  const functionsConsumer = new ethers.Contract(
+    consumerAddress,
+    functionsConsumerAbi,
+    signer
+  );
+
+  // Actual transaction call
+  const transaction = await functionsConsumer.sendRequest(
+    source, // source
+    "0x", // user hosted secrets - encryptedSecretsUrls - empty in this example
+    0, // don hosted secrets - slot ID - empty in this example
+    0, // don hosted secrets - version - empty in this example
+    args,
+    [], // bytesArgs - arguments can be encoded off-chain to bytes.
+    subscriptionId,
+    gasLimit,
+    ethers.utils.formatBytes32String(donId) // jobId is bytes32 representation of donId
+  );
+
+  // Log transaction details
+  console.log(
+    `\n✅ Functions request sent! Transaction hash ${transaction.hash}. Waiting for a response...`
+  );
+
+  console.log(
+    `See your request in the explorer ${explorerUrl}/tx/${transaction.hash}`
+  );
 };
