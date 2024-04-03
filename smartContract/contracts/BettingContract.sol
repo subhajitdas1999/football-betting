@@ -37,7 +37,8 @@ contract BettingContract is
         Result result;
     }
     mapping(uint => Game) public games;
-    // mapping (uint =>)
+    //requestId -> fixtureId
+    mapping(bytes32 => uint256) public pendingRequests;
 
     enum Result {
         // None, // The game has not been resolved or the result is a draw
@@ -51,7 +52,6 @@ contract BettingContract is
         uint256 winningAmount,
         address winner
     );
-    event RequestFulfilled(bytes s_lastResponse);
 
     //Errors
     error GameIsNotActive();
@@ -121,6 +121,7 @@ contract BettingContract is
             gasLimit,
             donID
         );
+        pendingRequests[s_lastRequestId] = stringToUint(args[0]);
         return s_lastRequestId;
     }
 
@@ -140,9 +141,11 @@ contract BettingContract is
         if (s_lastRequestId != requestId) {
             revert UnexpectedRequestID(requestId);
         }
+        uint256 fixtureId = pendingRequests[requestId];
+        Result result = Result(uint256(bytes32(response)));
+        distributeWinnings(fixtureId, result);
         s_lastResponse = response;
         s_lastError = err;
-        emit RequestFulfilled(s_lastResponse);
     }
 
     function registerGame(
@@ -279,6 +282,19 @@ contract BettingContract is
         return block.timestamp;
     }
 
+    function stringToUint(
+        string memory _str
+    ) internal pure returns (uint result) {
+        bytes memory b = bytes(_str);
+        uint256 i;
+        result = 0;
+        for (i = 0; i < b.length; i++) {
+            uint256 c = uint256(uint8(b[i]));
+            if (c >= 48 && c <= 57) {
+                result = result * 10 + (c - 48);
+            }
+        }
+    }
     // Ensure only the owner can upgrade the contract
     function _authorizeUpgrade(
         address newImplementation
