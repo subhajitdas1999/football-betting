@@ -8,6 +8,7 @@
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "baseUrl": "./src",
     "paths": {
+      "@contracts/*": ["contracts/*"],
       "@controllers/*": ["controllers/*"],
       "@middlewares/*": ["middlewares/*"],
       "@models/*": ["models/*"],
