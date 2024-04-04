@@ -12,10 +12,11 @@ import axios from "axios";
 import fs from "fs";
 import path from "path";
 import functionsConsumerAbi from "@contracts/BettingContract";
-import {
-  FulfillmentCode,
-  ResponseListener,
-} from "@chainlink/functions-toolkit";
+// import {
+//   FulfillmentCode,
+//   ResponseListener,
+// } from "@chainlink/functions-toolkit";
+import { currentTime } from "utils/getCurrentTime";
 dotenv.config({ path: "../.env" });
 
 const prisma = new PrismaClient();
@@ -96,7 +97,9 @@ export const getAllPredictions = catchAsync(
 
     let idsSet = new Set();
     predictions.forEach((prediction) => {
-      idsSet.add(prediction.fixtureId);
+      if (prediction.status == "NS") {
+        idsSet.add(prediction.fixtureId);
+      }
     });
 
     let ids = [...idsSet].join("-");
@@ -108,20 +111,18 @@ export const getAllPredictions = catchAsync(
         (p) => p.fixtureId === md.fixture.id
       );
       const status = md.fixture.status.short;
-      // if (
-      //   (status === "FT" || status === "AET" || status === "PEN") &&
-      //   specificPredictions[0].status === "NS"
-      // ) {
-      //   finishedMatchId.push(md.fixture.id);
-      // }
-      finishedMatchId.push(md.fixture.id);
+      if (
+        (status === "FT" || status === "AET" || status === "PEN") &&
+        specificPredictions[0].status === "NS"
+      ) {
+        finishedMatchId.push(md.fixture.id);
+      }
 
       return {
         ...md,
         predictions: specificPredictions,
       };
     });
-    // finishedMatchId = [1035037];
     res.status(HttpStatusCode.OK).json({
       status: "success",
       dataLength: modifyResult.length,
@@ -169,20 +170,39 @@ const getPredictedMatchData = async (ids: string) => {
 };
 
 const solveFinishedMatches = async (fixturesIds: number[]) => {
-  console.log("starting in solveFinishedMatches", Date.now());
+  console.log("starting in solveFinishedMatches", currentTime(), {
+    fixturesIds,
+  });
 
   // console.log(fixturesIds);
-  for (let i in fixturesIds) {
-    await handleFinishMatches(parseInt(i));
+  for (let i = 0; i < fixturesIds.length; i++) {
+    // console.log(fixturesIds[i], fixturesIds);
+
+    await handleFinishMatches(fixturesIds[i]);
   }
 
-  console.log("finished in solveFinishedMatches", Date.now());
+  console.log("✅ finished in solveFinishedMatches", currentTime());
 };
 
 const handleFinishMatches = async (fixtureId: number) => {
-  console.log("Inside handleFinishMatches", Date.now());
+  console.log(
+    "Inside handleFinishMatches",
+    currentTime(),
+    "Fixture ID ",
+    fixtureId
+  );
 
   await makeRequestMumbai(fixtureId);
+
+  console.log("Updating DB inside handleFinishMatches");
+
+  // update the database
+  await prisma.predictions.updateMany({
+    where: { fixtureId },
+    data: {
+      status: "Competed",
+    },
+  });
 };
 
 const makeRequestMumbai = async (fixtureId: number) => {
