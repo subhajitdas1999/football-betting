@@ -11,6 +11,7 @@ import { useAccount } from "wagmi";
 import { getClient } from "@wagmi/core";
 import { waitForTransactionReceipt } from "viem/actions";
 import { defaultWagmiConfig } from "../utils/defaultWagmiConfig";
+import { useParams } from "react-router-dom";
 
 interface ModalProps {
   isOpen: boolean;
@@ -30,7 +31,9 @@ export const PredictModal: React.FC<ModalProps> = ({
   away,
 }) => {
   const [amount, setAmount] = useState("");
-  const { isConnected, address } = useAccount({ config: config });
+  const { isConnected } = useAccount({ config: config });
+  const { id } = useParams<{ id: string }>();
+  const [league, season] = (id as string).split("-");
 
   const handleClose = () => {
     setAmount("");
@@ -76,6 +79,7 @@ export const PredictModal: React.FC<ModalProps> = ({
               gameStartTimeStamp,
               team === "home" ? 0 : 1,
               res.data.offChainHash,
+              `${league}-${season}`,
             ],
             value: parseEther(amount),
           });
@@ -88,7 +92,7 @@ export const PredictModal: React.FC<ModalProps> = ({
               abi: BettingContractAbi,
               address: "0xC1A566F0a33549bAa344e23282705A7008dCb4E8",
               functionName: "predictGame",
-              args: [fixtureId, team === "home" ? 0 : 1],
+              args: [fixtureId, team === "home" ? 0 : 1, `${league}-${season}`],
               value: parseEther(amount),
             });
             console.log({ result });
@@ -103,17 +107,6 @@ export const PredictModal: React.FC<ModalProps> = ({
           hash: result as `0x${string}`,
         });
         console.log(transactionReceipt);
-
-        //save the data to db
-        await axiosInstance.post("/v1/prediction/add", {
-          team,
-          amount: amount,
-          fixtureId: fixtureId.toString(),
-          chain: "MATIC",
-          walletAddress: address,
-          txHash: result,
-          leagueIdSeason: "39-2023",
-        });
       } catch (err) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-expect-error
