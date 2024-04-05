@@ -11,6 +11,7 @@ import adminRouter from "@routes/admin.routes";
 import dataRouter from "@routes/data.routes";
 import cors from "cors";
 import predictionRouter from "@routes/prediction.routes";
+import { listenToContractEvents } from "@controllers/eventListener";
 // import { rateLimit } from "express-rate-limit";
 
 const app = express();
@@ -48,6 +49,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 //Apply the rate limiting middleware to API calls only
 // app.use("/api", limiter);
+
+// Initialize event listeners
+listenToContractEvents();
 
 app.use("/api/data", dataRouter);
 app.use("/api/admin", adminRouter);
