@@ -5,21 +5,26 @@ import {
   getAllPredictionInput,
   searchPrediction,
 } from "validators/input.validator";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Result } from "@prisma/client";
 import { ethers } from "ethers";
 import dotenv from "dotenv";
 import axios from "axios";
 import fs from "fs";
 import path from "path";
 import functionsConsumerAbi from "@contracts/BettingContract";
-// import {
-//   FulfillmentCode,
-//   ResponseListener,
-// } from "@chainlink/functions-toolkit";
 import { currentTime } from "utils/getCurrentTime";
 dotenv.config({ path: "../.env" });
 
 const prisma = new PrismaClient();
+interface addPrediction {
+  team: Result;
+  amount: string;
+  fixtureId: number;
+  chain: string;
+  walletAddress: string;
+  txHash: string;
+  leagueIdSeason: string;
+}
 
 export const checkPrediction = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -54,27 +59,11 @@ export const checkPrediction = catchAsync(
   }
 );
 
-export const addNewPrediction = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const parsedBody = addPredictionInput.safeParse(req.body);
-    if (!parsedBody.success) {
-      throw new BaseError(
-        HttpStatusCode.UNPROCESSABLE_ENTITY,
-        "Invalid Input",
-        "Not valid input"
-      );
-    }
-
-    const prediction = await prisma.predictions.create({
-      data: parsedBody.data,
-    });
-
-    res.status(HttpStatusCode.OK).json({
-      status: "success",
-      data: prediction,
-    });
-  }
-);
+export const addNewPrediction = async (data: addPrediction) => {
+  await prisma.predictions.create({
+    data,
+  });
+};
 
 export const getAllPredictions = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -93,6 +82,9 @@ export const getAllPredictions = catchAsync(
 
     const predictions = await prisma.predictions.findMany({
       where: query,
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
     let idsSet = new Set();
@@ -166,6 +158,9 @@ const getPredictedMatchData = async (ids: string) => {
     delete matchData.players;
     modifyResult.push(matchData);
   });
+  modifyResult.sort(
+    (a: any, b: any) => a.fixture.timestamp - b.fixture.timestamp
+  );
   return modifyResult;
 };
 
@@ -206,7 +201,7 @@ const handleFinishMatches = async (fixtureId: number) => {
 };
 
 const makeRequestMumbai = async (fixtureId: number) => {
-  const consumerAddress = "0xc1a566f0a33549baa344e23282705a7008dcb4e8"; //In My case betting contract is the
+  const consumerAddress = process.env.BETTINGCONTRACT as string; //In My case betting contract is the
   const subscriptionId = 1340; // chainlink function subscription id
   // hardcoded for Polygon Mumbai
   // const routerAddress = "0x6E2dc0F9DB014aE19888F539E59285D2Ea04244C";

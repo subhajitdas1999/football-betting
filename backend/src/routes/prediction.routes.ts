@@ -8,6 +8,5 @@ const predictionRouter = express.Router();
 
 predictionRouter.get("/check", checkPrediction);
 predictionRouter.get("/", getAllPredictions);
-predictionRouter.post("/add", addNewPrediction);
 
 export default predictionRouter;
