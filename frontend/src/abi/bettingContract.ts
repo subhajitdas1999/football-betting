@@ -33,6 +33,21 @@ export const BettingContractAbi = [
   },
   {
     inputs: [],
+    name: "EmptyArgs",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "EmptySecrets",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "EmptySource",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "FailedInnerCall",
     type: "error",
   },
@@ -54,6 +69,11 @@ export const BettingContractAbi = [
   {
     inputs: [],
     name: "InvalidInitialization",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NoInlineSecrets",
     type: "error",
   },
   {
@@ -196,6 +216,24 @@ export const BettingContractAbi = [
         internalType: "uint256",
         name: "amount",
         type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "better",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "enum BettingContract.Result",
+        name: "result",
+        type: "uint8",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "leagueSeason",
+        type: "string",
       },
     ],
     name: "Predicted",
@@ -370,7 +408,7 @@ export const BettingContractAbi = [
         type: "uint8",
       },
     ],
-    name: "finaliseGameResults",
+    name: "finalizeGameResults",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -484,6 +522,25 @@ export const BettingContractAbi = [
   {
     inputs: [
       {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    name: "pendingRequests",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "uint256",
         name: "_fixtureId",
         type: "uint256",
@@ -492,6 +549,11 @@ export const BettingContractAbi = [
         internalType: "enum BettingContract.Result",
         name: "_result",
         type: "uint8",
+      },
+      {
+        internalType: "string",
+        name: "leagueSeason",
+        type: "string",
       },
     ],
     name: "predictGame",
@@ -533,6 +595,11 @@ export const BettingContractAbi = [
         internalType: "bytes32",
         name: "_OffChainHash",
         type: "bytes32",
+      },
+      {
+        internalType: "string",
+        name: "leagueSeason",
+        type: "string",
       },
     ],
     name: "registerAndPredictGame",
@@ -607,6 +674,65 @@ export const BettingContractAbi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "source",
+        type: "string",
+      },
+      {
+        internalType: "bytes",
+        name: "encryptedSecretsUrls",
+        type: "bytes",
+      },
+      {
+        internalType: "uint8",
+        name: "donHostedSecretsSlotID",
+        type: "uint8",
+      },
+      {
+        internalType: "uint64",
+        name: "donHostedSecretsVersion",
+        type: "uint64",
+      },
+      {
+        internalType: "string[]",
+        name: "args",
+        type: "string[]",
+      },
+      {
+        internalType: "bytes[]",
+        name: "bytesArgs",
+        type: "bytes[]",
+      },
+      {
+        internalType: "uint64",
+        name: "subscriptionId",
+        type: "uint64",
+      },
+      {
+        internalType: "uint32",
+        name: "gasLimit",
+        type: "uint32",
+      },
+      {
+        internalType: "bytes32",
+        name: "donID",
+        type: "bytes32",
+      },
+    ],
+    name: "sendRequest",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "requestId",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
