@@ -44,7 +44,7 @@ export default function Home() {
                   style={{
                     objectFit: "cover",
                     width: "200px",
-                    height: "auto",
+                    height: "200px",
                   }}
                 />
               </div>
