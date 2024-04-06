@@ -1,6 +1,6 @@
 const { ethers, upgrades } = require("hardhat");
 
-const proxyAddress = "0xC1A566F0a33549bAa344e23282705A7008dCb4E8";
+const proxyAddress = "0x1f27fdaB64E140277f9FFCb6c2911D06f6cf34b4";
 
 async function main() {
   const BettingContract = await ethers.getContractFactory("BettingContract");
