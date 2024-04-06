@@ -290,8 +290,20 @@ export const BettingContractAbi = [
       {
         indexed: false,
         internalType: "uint256",
+        name: "predictionAmount",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
         name: "winningAmount",
         type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "enum BettingContract.Result",
+        name: "result",
+        type: "uint8",
       },
       {
         indexed: false,
