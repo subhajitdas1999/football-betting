@@ -31,7 +31,7 @@ export const PredictModal: React.FC<ModalProps> = ({
   away,
 }) => {
   const [amount, setAmount] = useState("");
-  const { isConnected } = useAccount({ config: config });
+  const { isConnected, address } = useAccount({ config: config });
   const { id } = useParams<{ id: string }>();
   const [league, season] = (id as string).split("-");
 
@@ -54,13 +54,13 @@ export const PredictModal: React.FC<ModalProps> = ({
     //will check if the fixture ID game already present
     if (isConnected) {
       const res = await axiosInstance.get("/v1/prediction/check", {
-        params: { fixtureId, gameStartTimeStamp },
+        params: { fixtureId, gameStartTimeStamp, amount, address, team },
       });
       console.log({ res });
       //then check from smart contract
       const canPredict = await readContract(config, {
         abi: BettingContractAbi,
-        address: "0xC1A566F0a33549bAa344e23282705A7008dCb4E8",
+        address: import.meta.env.VITE_BETTINGCONTRACT,
         functionName: "canPredictGame",
         args: [fixtureId],
       });
@@ -72,7 +72,7 @@ export const PredictModal: React.FC<ModalProps> = ({
           //register and predict
           result = await writeContract(config, {
             abi: BettingContractAbi,
-            address: "0xC1A566F0a33549bAa344e23282705A7008dCb4E8",
+            address: import.meta.env.VITE_BETTINGCONTRACT,
             functionName: "registerAndPredictGame",
             args: [
               fixtureId,
@@ -87,15 +87,23 @@ export const PredictModal: React.FC<ModalProps> = ({
         } else {
           //predict
           if (canPredict) {
-            console.log("here predict");
-            result = await writeContract(config, {
-              abi: BettingContractAbi,
-              address: "0xC1A566F0a33549bAa344e23282705A7008dCb4E8",
-              functionName: "predictGame",
-              args: [fixtureId, team === "home" ? 0 : 1, `${league}-${season}`],
-              value: parseEther(amount),
-            });
-            console.log({ result });
+            if (res.data.duplicate == false) {
+              result = await writeContract(config, {
+                abi: BettingContractAbi,
+                address: import.meta.env.VITE_BETTINGCONTRACT,
+                functionName: "predictGame",
+                args: [
+                  fixtureId,
+                  team === "home" ? 0 : 1,
+                  `${league}-${season}`,
+                ],
+                value: parseEther(amount),
+              });
+              console.log({ result });
+            } else {
+              //can not predict
+              alert("Already a prediction exists with this amount");
+            }
           } else {
             //can not predict
             alert("Cannot predict this game");
