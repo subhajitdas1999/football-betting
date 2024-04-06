@@ -26,6 +26,18 @@ interface addPrediction {
   leagueIdSeason: string;
 }
 
+interface updateQuery {
+  team: Result;
+  fixtureId: number;
+  chain: string;
+  walletAddress: string;
+  amount: string;
+}
+
+interface updatePredictionData {
+  winingAmount: string;
+}
+
 export const checkPrediction = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const parsedBody = searchPrediction.safeParse(req.query);
@@ -40,6 +52,19 @@ export const checkPrediction = catchAsync(
     const prediction = await prisma.predictions.findFirst({
       where: {
         fixtureId: parsedBody.data.fixtureId,
+        isActive: true,
+      },
+    });
+    const duplicatePrediction = await prisma.predictions.findFirst({
+      where: {
+        fixtureId: parsedBody.data.fixtureId,
+        isActive: true,
+        walletAddress: parsedBody.data.address,
+        amount: parsedBody.data.amount,
+        team: parsedBody.data.team,
+      },
+      select: {
+        id: true,
       },
     });
     const offChainHash = ethers.utils.solidityKeccak256(
@@ -54,6 +79,7 @@ export const checkPrediction = catchAsync(
     res.status(HttpStatusCode.OK).json({
       status: "success",
       data: prediction,
+      duplicate: duplicatePrediction ? true : false,
       offChainHash,
     });
   }
@@ -63,6 +89,30 @@ export const addNewPrediction = async (data: addPrediction) => {
   await prisma.predictions.create({
     data,
   });
+  console.log("✅ prediction added in db for ", data.walletAddress);
+};
+
+export const updatePrediction = async (
+  updateQuery: updateQuery,
+  updatedData: updatePredictionData
+) => {
+  await prisma.predictions.update({
+    where: {
+      team_fixtureId_amount_chain_walletAddress: {
+        team: updateQuery.team,
+        fixtureId: updateQuery.fixtureId,
+        amount: updateQuery.amount,
+        chain: "MATIC",
+        walletAddress: updateQuery.walletAddress,
+      },
+    },
+    data: {
+      winingAmount: updatedData.winingAmount,
+      isActive: false,
+    },
+  });
+
+  console.log("✅ Prediction updated for ", updateQuery.walletAddress);
 };
 
 export const getAllPredictions = catchAsync(
@@ -75,7 +125,7 @@ export const getAllPredictions = catchAsync(
         "Not valid input"
       );
     }
-    const query: any = { isActive: true };
+    const query: any = {};
     if (parsedBody.data.walletAddress) {
       query.walletAddress = parsedBody.data.walletAddress;
     }
@@ -86,12 +136,9 @@ export const getAllPredictions = catchAsync(
         createdAt: "desc",
       },
     });
-
     let idsSet = new Set();
     predictions.forEach((prediction) => {
-      if (prediction.status == "NS") {
-        idsSet.add(prediction.fixtureId);
-      }
+      idsSet.add(prediction.fixtureId);
     });
 
     let ids = [...idsSet].join("-");
@@ -121,9 +168,9 @@ export const getAllPredictions = catchAsync(
       data: modifyResult,
     });
 
-    if (finishedMatchId.length > 0) {
-      solveFinishedMatches(finishedMatchId);
-    }
+    // if (finishedMatchId.length > 0) {
+    //   solveFinishedMatches(finishedMatchId);
+    // }
   }
 );
 
@@ -156,6 +203,7 @@ const getPredictedMatchData = async (ids: string) => {
     delete matchData.events;
     delete matchData.lineups;
     delete matchData.players;
+    delete matchData.statistics;
     modifyResult.push(matchData);
   });
   modifyResult.sort(
