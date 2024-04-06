@@ -8,6 +8,7 @@ interface Prediction {
   id: string;
   team: "home" | "away";
   fixtureId: number;
+  winingAmount: string;
   amount: string;
   chain: string;
   walletAddress: string;
@@ -156,13 +157,11 @@ const PredictionRow: React.FC<{ prediction: Prediction; teamName: string }> = ({
   prediction,
   teamName,
 }) => {
-  const receivedAmount = 0; // Replace with actual calculation logic
-
   return (
     <div className="grid grid-cols-3 text-right border-b border-gray-700 py-2 px-2">
       <span className="text-left capitalize">{teamName}</span>
       <span>{prediction.amount}</span>
-      <span>{receivedAmount}</span>
+      <span>{prediction.winingAmount}</span>
     </div>
   );
 };
