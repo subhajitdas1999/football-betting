@@ -12,5 +12,9 @@ export const Test = () => {
   //     console.log("Disconnected!");
   //   },
   // });
-  return <>{isConnected ? <div>connected</div> : <div>Not connected</div>}</>;
+  return (
+    <div className=" min-h-screen">
+      {isConnected ? <div>connected</div> : <div>Not connected</div>}
+    </div>
+  );
 };
