@@ -46,10 +46,18 @@ contract BettingContract is
         Away // The away team won
     }
     event GameRegistered(uint256 fixtureId, address registerer);
-    event Predicted(uint256 fixtureId, uint amount);
+    event Predicted(
+        uint256 fixtureId,
+        uint amount,
+        address better,
+        Result result,
+        string leagueSeason
+    );
     event WinningAmountTransferred(
         uint256 fixtureId,
+        uint256 predictionAmount,
         uint256 winningAmount,
+        Result result,
         address winner
     );
 
@@ -146,6 +154,7 @@ contract BettingContract is
         distributeWinnings(fixtureId, result);
         s_lastResponse = response;
         s_lastError = err;
+        delete pendingRequests[requestId];
     }
 
     function registerGame(
@@ -169,15 +178,17 @@ contract BettingContract is
         uint256 _fixtureId,
         uint256 _gameStartTimeStamp,
         Result _result,
-        bytes32 _OffChainHash
+        bytes32 _OffChainHash,
+        string memory leagueSeason
     ) external payable {
         registerGame(_fixtureId, _gameStartTimeStamp, _OffChainHash);
-        predictGame(_fixtureId, _result);
+        predictGame(_fixtureId, _result, leagueSeason);
     }
 
     function predictGame(
         uint256 _fixtureId,
-        Result _result
+        Result _result,
+        string memory leagueSeason
     ) public payable activeGame(_fixtureId) {
         Game storage game = games[_fixtureId];
         if (game.gameStartTimeStamp < block.timestamp + PREDICTION_BUFFER_TIME)
@@ -192,7 +203,13 @@ contract BettingContract is
         if (_result == Result.Away) game.weiCollectedForAway += msg.value;
 
         game.predictions.push(newPrediction);
-        emit Predicted(_fixtureId, msg.value);
+        emit Predicted(
+            _fixtureId,
+            msg.value,
+            msg.sender,
+            _result,
+            leagueSeason
+        );
     }
 
     // Function to distribute winnings
@@ -231,7 +248,9 @@ contract BettingContract is
                 );
                 emit WinningAmountTransferred(
                     _fixtureId,
+                    prediction.amount,
                     winningAmount,
+                    winningResult,
                     prediction.better
                 );
                 // Transfer winnings to the predictor
