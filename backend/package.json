@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "export NODE_ENV=development && npx ts-node-dev -r tsconfig-paths/register src/index.ts",
     "build": "tsc && tsc-alias",
-    "start": "export NODE_ENV=production && node dist/index.js"
+    "start": "export NODE_ENV=production && npx prisma migrate dev && npx prisma generate && node dist/index.js"
   },
   "keywords": [],
   "author": "",
