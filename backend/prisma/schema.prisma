@@ -40,6 +40,7 @@ model Predictions {
   team           Result
   fixtureId      Int
   amount         Decimal
+  winingAmount   Decimal  @default(0)
   chain          String
   walletAddress  String
   txHash         String
@@ -48,4 +49,6 @@ model Predictions {
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now()) @updatedAt
+
+  @@unique([team, fixtureId, amount, chain, walletAddress])
 }
