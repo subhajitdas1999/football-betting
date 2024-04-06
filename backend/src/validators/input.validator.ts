@@ -23,12 +23,16 @@ export const searchNoteQuery = z.object({
       val !== undefined && !isNaN(parseInt(val)) ? parseInt(val) : undefined
     ),
 });
+const Team = z.enum(["home", "away"]);
+
 export const searchPrediction = z.object({
   fixtureId: z.string().transform((val) => parseInt(val)),
   gameStartTimeStamp: z.string().transform((val) => parseInt(val)),
+  amount: z.string(),
+  address: z.string(),
+  team: Team,
 });
 
-const Team = z.enum(["home", "away"]);
 export const addPredictionInput = z.object({
   team: Team,
   amount: z.string(),
