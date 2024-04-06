@@ -11,7 +11,7 @@ import adminRouter from "@routes/admin.routes";
 import dataRouter from "@routes/data.routes";
 import cors from "cors";
 import predictionRouter from "@routes/prediction.routes";
-import { listenToContractEvents } from "@controllers/eventListener";
+import { listenToContractEvents } from "@controllers/eventListener.controller";
 // import { rateLimit } from "express-rate-limit";
 
 const app = express();
