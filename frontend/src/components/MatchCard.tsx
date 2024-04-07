@@ -30,7 +30,7 @@ export const MatchCard: React.FC<Props> = ({ data }) => {
     (async () => {
       const game = await readContract(config, {
         abi: BettingContractAbi,
-        address: "0xC1A566F0a33549bAa344e23282705A7008dCb4E8",
+        address: import.meta.env.VITE_BETTINGCONTRACT,
         functionName: "games",
         args: [data.fixture.id],
       });
