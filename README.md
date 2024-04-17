@@ -1,6 +1,6 @@
 # football-betting
 
-A football betting app
+A football betting app (view)[https://musical-dango-dc3cf7.netlify.app/]
 
 # Deploy
 
