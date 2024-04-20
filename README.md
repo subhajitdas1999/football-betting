@@ -11,13 +11,13 @@ npx hardhat run scripts/deploy.js --network mumbai
 # Update
 
 ```
-npx hardhat run scripts/update.js --network mumbai
+npx hardhat run scripts/update.js --network sepolia
 ```
 
 # verify
 
 ```
-npx hardhat verify --network mumbai 0x3535D0931227C811Bb38FCCa4F95B749Fe995722
+npx hardhat verify --network sepolia 0x3535D0931227C811Bb38FCCa4F95B749Fe995722
 ```
 
 Backend
