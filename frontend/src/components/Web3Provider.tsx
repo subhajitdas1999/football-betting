@@ -1,5 +1,5 @@
 import { WagmiProvider, createConfig, http } from "wagmi";
-import { polygonMumbai } from "wagmi/chains";
+import { sepolia } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 import { injected } from "wagmi/connectors";
@@ -8,9 +8,9 @@ import { injected } from "wagmi/connectors";
 export const config = createConfig(
   getDefaultConfig({
     // Your dApps chains
-    chains: [polygonMumbai],
+    chains: [sepolia],
     transports: {
-      [polygonMumbai.id]: http(),
+      [sepolia.id]: http(),
     },
     connectors: [injected({ target: "metaMask" })],
 
