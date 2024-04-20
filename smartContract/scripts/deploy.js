@@ -4,7 +4,7 @@ require("dotenv").config({ path: "../.env" });
 async function main() {
   const [admin, ...addrs] = await ethers.getSigners();
   console.log("Admin Wallet Address", admin.address);
-  const provider = new ethers.JsonRpcProvider(process.env.MUMBAI_URL);
+  const provider = new ethers.JsonRpcProvider(process.env.SEPOLIA_RPC);
   const adminBalanceBefore = ethers.formatEther(
     await provider.getBalance(admin.address)
   );
@@ -12,7 +12,7 @@ async function main() {
   const BettingContract = await ethers.getContractFactory("BettingContract");
 
   //
-  const routerAddress = "0x6E2dc0F9DB014aE19888F539E59285D2Ea04244C";
+  const routerAddress = "0xb83E47C2bC239B3bf370bc41e1459A34b41238D0";
   const secretHash =
     "0x6e4273316b49377475653257785543716637434735726d495a325a4437733400";
   const bettingContract = await upgrades.deployProxy(
@@ -26,7 +26,7 @@ async function main() {
   await bettingContract.waitForDeployment();
   console.log(
     "Betting contract deployed at",
-    "https://mumbai.polygonscan.com/address/" + bettingContract.target
+    "https://sepolia.etherscan.io/address/" + bettingContract.target
   );
 
   const adminBalanceAfter = ethers.formatEther(
@@ -41,3 +41,4 @@ main().catch((error) => {
 });
 
 // 0xC1A566F0a33549bAa344e23282705A7008dCb4E8
+// sepolia 0x797fFE9a4A278144DF216d6828E1dbd2F10A1107

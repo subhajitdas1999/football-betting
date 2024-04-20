@@ -23,10 +23,15 @@ module.exports = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    sepolia: {
+      url: process.env.SEPOLIA_RPC,
+      accounts: [process.env.SEPOLIA_PRIVATE_KEY],
+    },
   },
   etherscan: {
     apiKey: {
       polygonMumbai: process.env.POLYGON_API_KEY,
+      sepolia: process.env.ETHERSCAN_API_KEY,
     },
   },
 };
