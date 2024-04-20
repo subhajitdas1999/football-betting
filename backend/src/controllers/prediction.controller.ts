@@ -250,12 +250,12 @@ const handleFinishMatches = async (fixtureId: number) => {
 
 const makeRequestMumbai = async (fixtureId: number) => {
   const consumerAddress = process.env.BETTINGCONTRACT as string; //In My case betting contract is the
-  const subscriptionId = 1340; // chainlink function subscription id
+  const subscriptionId = 2370; // chainlink function subscription id
   // hardcoded for Polygon Mumbai
   // const routerAddress = "0x6E2dc0F9DB014aE19888F539E59285D2Ea04244C";
   // const linkTokenAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
-  const donId = "fun-polygon-mumbai-1";
-  const explorerUrl = "https://mumbai.polygonscan.com";
+  const donId = "fun-ethereum-sepolia-1";
+  const explorerUrl = "https://sepolia.etherscan.io/";
 
   // Initialize functions settings
   const source = fs
@@ -277,7 +277,7 @@ const makeRequestMumbai = async (fixtureId: number) => {
       "private key not provided - check your environment variables"
     );
 
-  const rpcUrl = process.env.POLYGON_MUMBAI_RPC_URL; // fetch mumbai RPC URL
+  const rpcUrl = process.env.SEPOLIA_RPC; // fetch sepoila RPC URL
 
   if (!rpcUrl)
     throw new Error(`rpcUrl not provided  - check your environment variables`);

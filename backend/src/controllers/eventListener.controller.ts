@@ -7,9 +7,7 @@ import { addNewPrediction, updatePrediction } from "./prediction.controller";
 import { Result } from "@prisma/client";
 dotenv.config({ path: "../.env" });
 
-const provider = new ethers.providers.JsonRpcProvider(
-  process.env.POLYGON_MUMBAI_RPC_URL
-);
+const provider = new ethers.providers.JsonRpcProvider(process.env.SEPOLIA_RPC);
 const contract = new ethers.Contract(
   process.env.BETTINGCONTRACT as string,
   functionsConsumerAbi,
