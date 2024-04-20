@@ -23,7 +23,7 @@ export const listenToContractEvents = () => {
         team: result == 0 ? Result.home : Result.away,
         amount: ethers.utils.formatEther(amount),
         fixtureId: parseInt(fixtureId.toString()),
-        chain: "MATIC",
+        chain: "SEPOLIA",
         walletAddress: better,
         txHash: event.transactionHash,
         leagueIdSeason: leagueSeason,
@@ -52,7 +52,7 @@ export const listenToContractEvents = () => {
         team: result == 0 ? Result.home : Result.away,
         fixtureId: parseInt(fixtureId.toString()),
         amount: ethers.utils.formatEther(predictionAmount),
-        chain: "MATIC",
+        chain: "SEPOLIA",
         walletAddress: winnerAddress,
       };
       const data = {

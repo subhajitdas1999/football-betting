@@ -102,7 +102,7 @@ export const updatePrediction = async (
         team: updateQuery.team,
         fixtureId: updateQuery.fixtureId,
         amount: updateQuery.amount,
-        chain: "MATIC",
+        chain: "SEPOLIA",
         walletAddress: updateQuery.walletAddress,
       },
     },
